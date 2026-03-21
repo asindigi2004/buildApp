@@ -4,16 +4,23 @@ import Builder from './pages/Builder'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 
-function App() {
+function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
+  return token ? children : <Navigate to="/login" />
+}
 
+function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/builder/:deviceId" element={token ? <Builder /> : <Navigate to="/login" />} />
-        <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/builder/:deviceId" element={
+          <PrivateRoute><Builder /></PrivateRoute>
+        } />
+        <Route path="/dashboard" element={
+          <PrivateRoute><Dashboard /></PrivateRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )

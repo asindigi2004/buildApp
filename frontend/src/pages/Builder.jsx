@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/client'
-
+import Editor from '@monaco-editor/react'
 function Builder() {
   const { deviceId } = useParams()
   const navigate = useNavigate()
@@ -152,18 +152,33 @@ function Builder() {
             </div>
           )}
 
-          {tab === 'code' && (
-            <div style={styles.tabContent}>
-              <p style={styles.infoMuted}>Write code to control your device. Use setDisplay() to show text on screen.</p>
-              <textarea
-                style={styles.codeEditor}
-                value={code}
-                onChange={e => setCode(e.target.value)}
-                spellCheck={false}
-              />
-              <button style={styles.runBtn} onClick={runCode}>▶ Run Code</button>
-            </div>
-          )}
+      {tab === 'code' && (
+  <div style={{display:'flex', flexDirection:'column', gap:10, flex:1}}>
+    <p style={styles.infoMuted}>Use setDisplay() to show text on screen.</p>
+    <div style={{flex:1, minHeight:280, borderRadius:8, overflow:'hidden', border:'0.5px solid rgba(255,255,255,0.1)'}}>
+      <Editor
+        height="280px"
+        defaultLanguage="javascript"
+        theme="vs-dark"
+        value={code}
+        onChange={(val) => setCode(val || '')}
+        options={{
+          fontSize: 13,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          lineNumbers: 'on',
+          roundedSelection: true,
+          cursorStyle: 'line',
+          automaticLayout: true,
+          tabSize: 2,
+          wordWrap: 'on',
+          padding: { top: 12 }
+        }}
+      />
+    </div>
+    <button style={styles.runBtn} onClick={runCode}>▶ Run Code</button>
+  </div>
+)}
 
           {tab === 'output' && (
             <div style={styles.tabContent}>
