@@ -11,6 +11,7 @@ function Dashboard() {
   const [deleting, setDeleting] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editingName, setEditingName] = useState('')
+  const [copied, setCopied] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -45,6 +46,13 @@ function Dashboard() {
     setEditingId(null)
   }
 
+  const shareBuild = (build) => {
+    const url = `${window.location.origin}/builds/${build.share_token}`
+    navigator.clipboard.writeText(url)
+    setCopied(build.id)
+    setTimeout(() => setCopied(null), 2000)
+  }
+
   return (
     <div style={styles.page}>
       <nav style={styles.nav}>
@@ -72,7 +80,7 @@ function Dashboard() {
           <div style={styles.grid}>
             {builds.map(build => {
               const partCount = build.parts_installed?.length || 0
-              const maxParts = build.device_type === 'pc' ? 6 : build.device_type === 'camera' ? 5 : 5
+              const maxParts = build.device_type === 'pc' ? 6 : 5
               const pct = Math.round((partCount / maxParts) * 100)
 
               return (
@@ -109,6 +117,13 @@ function Dashboard() {
                     </div>
 
                     <div style={styles.cardActions}>
+                      <button style={{
+                        ...styles.shareBtn,
+                        borderColor: copied === build.id ? 'rgba(0,229,160,0.4)' : 'rgba(255,255,255,0.15)',
+                        color: copied === build.id ? '#00e5a0' : '#6b7280'
+                      }} onClick={() => shareBuild(build)}>
+                        {copied === build.id ? '✓ Copied!' : '🔗 Share'}
+                      </button>
                       <button style={styles.continueBtn}
                         onClick={() => navigate(`/builder/${build.device_type}`)}>
                         Continue →
@@ -170,6 +185,7 @@ const styles = {
   buildMeta: { fontSize: 12, color: '#6b7280', marginBottom: 2 },
   buildDate: { fontSize: 11, color: '#444' },
   cardActions: { display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 },
+  shareBtn: { background: 'none', border: '0.5px solid', padding: '7px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12, transition: 'all 0.2s' },
   continueBtn: { background: 'none', border: '0.5px solid rgba(255,255,255,0.15)', color: '#e8eaf0', padding: '7px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 12 },
   deleteBtn: { background: 'none', border: '0.5px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 14 },
   progressWrap: { height: 3, background: 'rgba(255,255,255,0.05)' },

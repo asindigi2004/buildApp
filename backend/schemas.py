@@ -25,20 +25,17 @@ class BuildCreate(BaseModel):
     device_type: str
 
 class BuildUpdate(BaseModel):
-    parts_installed: Optional[List[str]] = None
-    user_code: Optional[str] = None
-
-class BuildUpdate(BaseModel):
     name: Optional[str] = None
     parts_installed: Optional[List[str]] = None
     user_code: Optional[str] = None
-    
+
 class BuildOut(BaseModel):
     id: int
     name: str
     device_type: str
     parts_installed: List
     user_code: str
+    share_token: str
     created_at: datetime
 
     class Config:
