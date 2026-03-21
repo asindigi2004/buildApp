@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import SharedBuild from './pages/SharedBuild'
 import Gallery from './pages/Gallery'
+import NotFound from './pages/NotFound'
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
@@ -25,6 +26,7 @@ function App() {
         <Route path="/dashboard" element={
           <PrivateRoute><Dashboard /></PrivateRoute>
         } />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

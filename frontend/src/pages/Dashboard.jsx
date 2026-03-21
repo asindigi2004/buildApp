@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
+import Toast from '../components/Toast'
+import { useToast } from '../components/useToast'
 
 const icons = { pc: '🖥️', camera: '📷', keychain: '🔑' }
 const colors = { pc: '#0066ff', camera: '#f59e0b', keychain: '#00e5a0' }
@@ -12,6 +14,7 @@ function Dashboard() {
   const [editingId, setEditingId] = useState(null)
   const [editingName, setEditingName] = useState('')
   const [copied, setCopied] = useState(null)
+  const { toast, showToast, hideToast } = useToast()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -25,8 +28,9 @@ function Dashboard() {
     try {
       await api.delete(`/builds/${id}`)
       setBuilds(prev => prev.filter(b => b.id !== id))
+      showToast('Build deleted')
     } catch (e) {
-      alert('Delete failed')
+      showToast('Delete failed', 'error')
     }
     setDeleting(null)
   }
@@ -40,8 +44,9 @@ function Dashboard() {
     try {
       await api.patch(`/builds/${id}`, { name: editingName })
       setBuilds(prev => prev.map(b => b.id === id ? { ...b, name: editingName } : b))
+      showToast('Build renamed')
     } catch (e) {
-      alert('Rename failed')
+      showToast('Rename failed', 'error')
     }
     setEditingId(null)
   }
@@ -50,6 +55,7 @@ function Dashboard() {
     const url = `${window.location.origin}/builds/${build.share_token}`
     navigator.clipboard.writeText(url)
     setCopied(build.id)
+    showToast('Link copied to clipboard!')
     setTimeout(() => setCopied(null), 2000)
   }
 
@@ -125,7 +131,7 @@ function Dashboard() {
                         {copied === build.id ? '✓ Copied!' : '🔗 Share'}
                       </button>
                       <button style={styles.continueBtn}
-                        onClick={() => navigate(`/builder/${build.device_type}`)}>
+                        onClick={() => navigate(`/builder/${build.device_type}?buildId=${build.id}`)}>
                         Continue →
                       </button>
                       <button style={styles.deleteBtn}
@@ -149,6 +155,8 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   )
 }

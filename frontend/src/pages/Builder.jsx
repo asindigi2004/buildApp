@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import api from '../api/client'
 import Editor from '@monaco-editor/react'
+import Toast from '../components/Toast'
+import { useToast } from '../components/useToast'
 
 function Builder() {
   const { deviceId } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [device, setDevice] = useState(null)
   const [installed, setInstalled] = useState([])
   const [selected, setSelected] = useState(null)
@@ -16,11 +19,25 @@ function Builder() {
   const [saving, setSaving] = useState(false)
   const [tab, setTab] = useState('parts')
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const { toast, showToast, hideToast } = useToast()
 
   useEffect(() => {
-    api.get(`/devices/${deviceId}`).then(r => {
-      setDevice(r.data)
-      setBuildName(`My ${r.data.name}`)
+    api.get(`/devices/${deviceId}`).then(deviceRes => {
+      setDevice(deviceRes.data)
+      setBuildName(`My ${deviceRes.data.name}`)
+
+      const existingBuildId = searchParams.get('buildId')
+      if (existingBuildId) {
+        api.get(`/builds/${existingBuildId}`).then(r => {
+          setBuildId(r.data.id)
+          setBuildName(r.data.name)
+          if (r.data.user_code) setCode(r.data.user_code)
+          const installedParts = deviceRes.data.parts.filter(p =>
+            r.data.parts_installed.includes(p.id)
+          )
+          setInstalled(installedParts)
+        })
+      }
     })
   }, [deviceId])
 
@@ -28,6 +45,10 @@ function Builder() {
     if (installed.find(p => p.id === part.id)) return
     setInstalled(prev => [...prev, part])
     setSelected(part)
+  }
+
+  const uninstallPart = (partId) => {
+    setInstalled(prev => prev.filter(p => p.id !== partId))
   }
 
   const runCode = () => {
@@ -53,7 +74,7 @@ function Builder() {
 
   const saveBuild = async () => {
     if (!buildName.trim()) {
-      alert('Please give your build a name first!')
+      showToast('Please give your build a name first!', 'error')
       return
     }
     setSaving(true)
@@ -74,9 +95,10 @@ function Builder() {
         })
       }
       setSaveSuccess(true)
+      showToast('Build saved!')
       setTimeout(() => setSaveSuccess(false), 2000)
     } catch (e) {
-      alert('Save failed')
+      showToast('Save failed', 'error')
     }
     setSaving(false)
   }
@@ -91,6 +113,8 @@ function Builder() {
 
   return (
     <div style={styles.page}>
+      <style>{`@media (max-width: 768px) { .builder-body { grid-template-columns: 1fr !important; } }`}</style>
+
       <div style={styles.header}>
         <button style={styles.back} onClick={() => navigate('/')}>← Back</button>
         <span style={styles.headerTitle}>// {device.name}</span>
@@ -111,7 +135,7 @@ function Builder() {
         </div>
       </div>
 
-      <div style={styles.body}>
+      <div style={styles.body} className="builder-body">
         {/* LEFT - parts */}
         <div style={styles.leftPanel}>
           <div style={styles.panelHead}>Components ({installed.length}/{device.parts.length})</div>
@@ -282,6 +306,7 @@ function Builder() {
                     <div key={p.id} style={styles.installedRow}>
                       <span style={{color:'#00e5a0'}}>✓</span> {p.name}
                       <span style={{marginLeft:'auto', fontSize:11, color:'#6b7280'}}>{p.spec}</span>
+                      <button style={styles.uninstallBtn} onClick={() => uninstallPart(p.id)}>✕</button>
                     </div>
                   ))
               }
@@ -329,6 +354,8 @@ function Builder() {
           )}
         </div>
       </div>
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   )
 }
@@ -399,6 +426,7 @@ const styles = {
   infoMuted: { fontSize: 13, color: '#6b7280', lineHeight: 1.6 },
   divider: { height: '0.5px', background: 'rgba(255,255,255,0.07)' },
   installedRow: { fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, color: '#e8eaf0' },
+  uninstallBtn: { background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 12, padding: '0 4px', opacity: 0.6 },
   completeBanner: { background: 'rgba(0,229,160,0.1)', border: '0.5px solid rgba(0,229,160,0.3)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#00e5a0', textAlign: 'center' },
   runBtn: { background: 'none', border: '0.5px solid #00e5a0', color: '#00e5a0', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 600 },
   outputBox: { flex: 1, background: '#0a0c0f', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 12, fontSize: 12, color: '#00e5a0', lineHeight: 1.8, whiteSpace: 'pre-wrap', minHeight: 200 }
