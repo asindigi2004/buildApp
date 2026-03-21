@@ -28,3 +28,12 @@ def update_build(build_id: int, update: schemas.BuildUpdate, db: Session = Depen
     db.commit()
     db.refresh(build)
     return build
+
+@router.delete("/{build_id}")
+def delete_build(build_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    build = db.query(models.Build).filter(models.Build.id == build_id, models.Build.owner_id == current_user.id).first()
+    if not build:
+        raise HTTPException(status_code=404, detail="Build not found")
+    db.delete(build)
+    db.commit()
+    return {"message": "Build deleted"}

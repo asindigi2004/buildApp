@@ -28,6 +28,11 @@ class BuildUpdate(BaseModel):
     parts_installed: Optional[List[str]] = None
     user_code: Optional[str] = None
 
+class BuildUpdate(BaseModel):
+    name: Optional[str] = None
+    parts_installed: Optional[List[str]] = None
+    user_code: Optional[str] = None
+    
 class BuildOut(BaseModel):
     id: int
     name: str
