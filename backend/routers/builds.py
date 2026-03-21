@@ -26,6 +26,11 @@ def create_build(build: schemas.BuildCreate, db: Session = Depends(get_db), curr
 def my_builds(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     return db.query(models.Build).filter(models.Build.owner_id == current_user.id).all()
 
+@router.get("/gallery")
+def get_gallery(db: Session = Depends(get_db)):
+    builds = db.query(models.Build).order_by(models.Build.created_at.desc()).limit(50).all()
+    return builds
+
 @router.patch("/{build_id}", response_model=schemas.BuildOut)
 def update_build(build_id: int, update: schemas.BuildUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     build = db.query(models.Build).filter(models.Build.id == build_id, models.Build.owner_id == current_user.id).first()
@@ -45,3 +50,5 @@ def delete_build(build_id: int, db: Session = Depends(get_db), current_user=Depe
     db.delete(build)
     db.commit()
     return {"message": "Build deleted"}
+
+

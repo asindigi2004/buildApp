@@ -4,6 +4,7 @@ import Builder from './pages/Builder'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import SharedBuild from './pages/SharedBuild'
+import Gallery from './pages/Gallery'
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/gallery" element={<Gallery />} />
         <Route path="/builds/:token" element={<SharedBuild />} />
         <Route path="/builder/:deviceId" element={
           <PrivateRoute><Builder /></PrivateRoute>

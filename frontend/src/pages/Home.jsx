@@ -23,6 +23,7 @@ function Home() {
       <nav style={styles.nav}>
         <span style={styles.navLogo}>BuildLab</span>
         <div style={styles.navRight}>
+          <button style={styles.navBtn} onClick={() => navigate('/gallery')}>Gallery</button>
           {user ? (
             <>
               <button style={styles.navBtn} onClick={() => navigate('/dashboard')}>My Builds</button>
