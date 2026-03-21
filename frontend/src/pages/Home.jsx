@@ -4,6 +4,7 @@ import api from '../api/client'
 
 const icons = { pc: '🖥️', camera: '📷', keychain: '🔑' }
 const colors = { pc: '#0066ff', camera: '#f59e0b', keychain: '#00e5a0' }
+const badges = { pc: 'Full Simulator', camera: 'Full Simulator', keychain: 'Full Simulator' }
 
 function Home() {
   const [devices, setDevices] = useState([])
@@ -17,6 +18,14 @@ function Home() {
   }, [])
 
   const logout = () => { localStorage.removeItem('token'); navigate('/login') }
+
+  const handleDeviceClick = (device) => {
+    if (!token) { navigate('/login'); return }
+    if (device.id === 'keychain') navigate('/keychain')
+    else if (device.id === 'camera') navigate('/camera')
+    else if (device.id === 'pc') navigate('/pc')
+    else navigate(`/builder/${device.id}`)
+  }
 
   return (
     <div style={styles.page}>
@@ -45,7 +54,7 @@ function Home() {
       <div style={styles.grid}>
         {devices.map(device => (
           <div key={device.id} style={{...styles.card, '--accent': colors[device.id] || '#00e5a0'}}
-            onClick={() => token ? navigate(`/builder/${device.id}`) : navigate('/login')}>
+            onClick={() => handleDeviceClick(device)}>
             <div style={{...styles.cardIcon, background: `${colors[device.id]}18`}}>
               <span style={{fontSize: 28}}>{icons[device.id]}</span>
             </div>
@@ -57,7 +66,17 @@ function Home() {
               ))}
               <span style={styles.tag}>+{device.parts.length - 3} more</span>
             </div>
-            <div style={{...styles.cardArrow, color: colors[device.id]}}>Start Building →</div>
+            <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+              <div style={{...styles.cardArrow, color: colors[device.id]}}>Start Building →</div>
+              <span style={{
+                ...styles.simulatorBadge,
+                borderColor: `${colors[device.id]}44`,
+                color: colors[device.id],
+                background: `${colors[device.id]}11`
+              }}>
+                {badges[device.id]}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -84,7 +103,8 @@ const styles = {
   cardDesc: { fontSize: 13, color: '#6b7280', lineHeight: 1.6, marginBottom: 16 },
   cardTags: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 },
   tag: { fontSize: 11, padding: '3px 8px', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 4, color: '#6b7280' },
-  cardArrow: { fontSize: 13, fontWeight: 600 }
+  cardArrow: { fontSize: 13, fontWeight: 600 },
+  simulatorBadge: { fontSize: 10, padding: '2px 8px', border: '0.5px solid', borderRadius: 20 }
 }
 
 export default Home

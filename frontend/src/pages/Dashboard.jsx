@@ -59,6 +59,13 @@ function Dashboard() {
     setTimeout(() => setCopied(null), 2000)
   }
 
+  const continueBuild = (build) => {
+    if (build.device_type === 'keychain') navigate(`/keychain?buildId=${build.id}`)
+    else if (build.device_type === 'camera') navigate(`/camera?buildId=${build.id}`)
+    else if (build.device_type === 'pc') navigate(`/pc?buildId=${build.id}`)
+    else navigate(`/builder/${build.device_type}?buildId=${build.id}`)
+  }
+
   return (
     <div style={styles.page}>
       <nav style={styles.nav}>
@@ -130,8 +137,7 @@ function Dashboard() {
                       }} onClick={() => shareBuild(build)}>
                         {copied === build.id ? '✓ Copied!' : '🔗 Share'}
                       </button>
-                      <button style={styles.continueBtn}
-                        onClick={() => navigate(`/builder/${build.device_type}?buildId=${build.id}`)}>
+                      <button style={styles.continueBtn} onClick={() => continueBuild(build)}>
                         Continue →
                       </button>
                       <button style={styles.deleteBtn}
