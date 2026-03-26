@@ -6,8 +6,12 @@ import models
 
 app = FastAPI(title="BuildLab API")
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create tables with error handling
+try:
+    Base.metadata.create_all(bind=engine)
+    print("✅ Tables created successfully")
+except Exception as e:
+    print(f"❌ Table creation failed: {e}")
 
 app.add_middleware(
     CORSMiddleware,
